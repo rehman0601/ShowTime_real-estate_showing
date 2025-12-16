@@ -28,7 +28,6 @@
     flex-direction: column;
     transition: transform 0.2s, box-shadow 0.2s;
     height: 100%;
-    /* Ensure full height */
 }
 
 .card:hover {
@@ -41,7 +40,17 @@
     height: 14rem;
     object-fit: cover;
     background-color: #e5e7eb;
-    /* Fallback color */
+}
+
+.card-img-placeholder {
+    width: 100%;
+    height: 14rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e5e7eb;
+    color: #6b7280;
+    font-size: 0.875rem;
 }
 
 .card-body {
@@ -54,7 +63,7 @@
 .card-body .btn {
     margin-top: auto;
     align-self: center;
-    max-width: 90%;
+    width: 100%;
 }
 
 .card-title {
@@ -76,6 +85,120 @@
     color: var(--primary-color);
     font-weight: 700;
     margin-bottom: 1.5rem;
+}
+
+/* Section Styling */
+.section-margin {
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Tables */
+.table-container {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.data-table th {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+}
+
+.data-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    color: #4b5563;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Text Utilities */
+.text-muted {
+    color: #4b5563;
+}
+
+.text-disabled {
+    color: #9ca3af;
+}
+
+.text-label {
+    color: #6b7280;
+}
+
+.text-strong {
+    font-weight: 500;
+    color: #111827;
+}
+
+.link-action {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.link-action:hover {
+    text-decoration: underline;
+}
+
+.booking-info-row {
+    margin-bottom: 0.5rem;
+}
+
+.booking-status {
+    margin-top: auto;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge-danger {
+    background-color: #fee2e2;
+    color: #b91c1c;
 }
 
 /* Modal Styling */

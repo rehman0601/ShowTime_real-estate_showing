@@ -1,23 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { format, addDays, startOfWeek, addMinutes, parseISO } from 'date-fns';
-import { Check, X, Clock } from 'lucide-react';
+import { Check, X, Clock, Trash } from 'lucide-react';
 import io from 'socket.io-client';
 import '../styles/property.css';
 
+/**
+ * PropertyManage Component
+ * 
+ * Allows an agent to manage a specific property's availability and bookings.
+ * - View property details.
+ * - Delete the property.
+ * - Set specific time slots as "Available" for the next 7 days.
+ * - Review pending booking requests (Approve/Reject).
+ * - View confirmed showings.
+ * - Uses Socket.io for real-time updates.
+ */
 const PropertyManage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [property, setProperty] = useState(null);
     const [slots, setSlots] = useState([]);
     const [selectedDate, setSelectedDate] = useState(new Date());
 
     useEffect(() => {
+        // Connect to Socket.io server
         const s = io(import.meta.env.VITE_API_URL.replace('/api', ''));
 
         fetchProperty();
         fetchSlots();
 
+        // Listen for real-time updates
         s.on('slotBooked', (data) => {
             if (data.propertyId === id) fetchSlots();
         });
@@ -28,6 +42,9 @@ const PropertyManage = () => {
         return () => s.disconnect();
     }, [id]);
 
+    /**
+     * Gets property details
+     */
     const fetchProperty = async () => {
         try {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/properties/${id}`);
@@ -37,6 +54,9 @@ const PropertyManage = () => {
         }
     };
 
+    /**
+     * Gets all bookings/slots for this property
+     */
     const fetchSlots = async () => {
         try {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/bookings/property/${id}`);
@@ -46,6 +66,10 @@ const PropertyManage = () => {
         }
     };
 
+    /**
+     * Creates a new available slot for a specific time on the selected date.
+     * @param {string} time - Time in "HH:mm" format (e.g., "09:00")
+     */
     const addSlot = async (time) => {
         const [hours, minutes] = time.split(':');
         const start = new Date(selectedDate);
@@ -64,11 +88,33 @@ const PropertyManage = () => {
         }
     };
 
+    /**
+     * Updates the status of a booking (e.g., Agent confirms a request).
+     * @param {string} slotId - The ID of the booking/slot
+     * @param {string} status - New status ('confirmed' or 'rejected')
+     */
     const updateStatus = async (slotId, status) => {
         try {
             await axios.put(`${import.meta.env.VITE_API_URL}/bookings/${slotId}/status`, { status });
         } catch (err) {
             console.error(err);
+        }
+    };
+
+    /**
+     * Deletes the property and all associated bookings after confirmation.
+     * Redirects to dashboard upon success.
+     */
+    const handleDelete = async () => {
+        if (!window.confirm('Are you sure you want to delete this property? This action PERMANENTLY removes the property and all associated bookings.')) {
+            return;
+        }
+        try {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/properties/${id}`);
+            navigate('/dashboard');
+        } catch (err) {
+            console.error(err);
+            alert('Failed to delete property');
         }
     };
 
@@ -90,7 +136,15 @@ const PropertyManage = () => {
                         </div>
                     </div>
 
+                    <button
+                        onClick={handleDelete}
+                        className="btn btn-outline-danger w-full flex items-center justify-center mb-6"
+                    >
+                        <Trash size={18} className="mr-2" /> Delete Property
+                    </button>
+
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>Manage Availability</h3>
+                    {/* Calendar Day Picker */}
                     <div className="calendar-scroll">
                         {Array.from({ length: 7 }).map((_, i) => {
                             const date = addDays(new Date(), i);
@@ -108,6 +162,7 @@ const PropertyManage = () => {
                         })}
                     </div>
 
+                    {/* Time Slots Grid */}
                     <div className="slot-grid">
                         {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(time => {
                             const slotExists = slots.find(s =>
@@ -130,6 +185,7 @@ const PropertyManage = () => {
                 </div>
             </div>
 
+            {/* Sidebar: Pending & Confirmed */}
             <div>
                 <div className="section-box">
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem', display: 'flex', alignItems: 'center' }}>

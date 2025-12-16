@@ -1,7 +1,11 @@
 const Booking = require('../models/Booking');
 const Property = require('../models/Property');
 
-// Create available slots (Agent)
+/**
+ * Create available slots for a property
+ * @route POST /api/bookings
+ * @access Private (Agent)
+ */
 exports.createSlots = async (req, res) => {
   try {
     const { propertyId, startTime, endTime } = req.body;
@@ -23,7 +27,7 @@ exports.createSlots = async (req, res) => {
 
     const booking = await newBooking.save();
     
-    // Real-time update
+    // Real-time update via Socket.io
     const io = req.app.get('io');
     io.emit('slotsUpdated', { propertyId });
 
@@ -34,7 +38,11 @@ exports.createSlots = async (req, res) => {
   }
 };
 
-// Get slots for a property
+/**
+ * Get all slots for a specific property
+ * @route GET /api/bookings/property/:propertyId
+ * @access Public
+ */
 exports.getSlots = async (req, res) => {
   try {
     const slots = await Booking.find({ propertyId: req.params.propertyId }).sort({ startTime: 1 });
@@ -45,7 +53,11 @@ exports.getSlots = async (req, res) => {
   }
 };
 
-// Book a slot (Buyer)
+/**
+ * Book a specific slot
+ * @route POST /api/bookings/book/:id
+ * @access Private (Buyer)
+ */
 exports.bookSlot = async (req, res) => {
   try {
     const slot = await Booking.findById(req.params.id);
@@ -67,7 +79,11 @@ exports.bookSlot = async (req, res) => {
   }
 };
 
-// Update status (Agent: Confirm/Reject)
+/**
+ * Update booking status (Confirm/Reject)
+ * @route PUT /api/bookings/:id/status
+ * @access Private (Agent)
+ */
 exports.updateStatus = async (req, res) => {
   try {
     const { status } = req.body; // confirmed, rejected
@@ -80,11 +96,9 @@ exports.updateStatus = async (req, res) => {
 
     slot.status = status;
     if (status === 'rejected') {
-      slot.buyerId = undefined; // Clear buyer if rejected? Or keep record? 
-      // Requirement says "approve or reject", usually implies keeping the record but status rejected.
-      // If rejected, maybe it becomes available again? 
-      // Let's assume rejected means the booking is dead. If agent wants to make it available, they create a new slot or we add logic to reset.
-      // Simplest: Rejected slot stays rejected.
+      slot.buyerId = undefined; 
+      // Reset booking data on rejection so it becomes available again if needed, 
+      // or stays rejected but cleared. Logic here implies cleared buyer.
     }
     
     await slot.save();
@@ -100,10 +114,16 @@ exports.updateStatus = async (req, res) => {
   }
 };
 
-// Get my bookings (Buyer)
+/**
+ * Get bookings for the logged-in buyer
+ * @route GET /api/bookings/my-bookings
+ * @access Private (Buyer)
+ */
 exports.getMyBookings = async (req, res) => {
     try {
-        const bookings = await Booking.find({ buyerId: req.user.id }).populate('propertyId');
+        const bookings = await Booking.find({ buyerId: req.user.id })
+            .populate('propertyId')
+            .populate('agentId', 'name email');
         res.json(bookings);
     } catch (err) {
         console.error(err.message);
@@ -111,7 +131,11 @@ exports.getMyBookings = async (req, res) => {
     }
 };
 
-// Get my schedule (Agent) - slots that are booked or pending
+/**
+ * Get schedule for the logged-in agent (booked/pending slots)
+ * @route GET /api/bookings/agent-schedule
+ * @access Private (Agent)
+ */
 exports.getAgentSchedule = async (req, res) => {
     try {
         const bookings = await Booking.find({ agentId: req.user.id, status: { $ne: 'available' } }).populate('propertyId').populate('buyerId', 'name email');

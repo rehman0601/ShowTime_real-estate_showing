@@ -22,5 +22,6 @@ router.get('/', propertyController.getProperties);
 router.get('/my-properties', auth, propertyController.getAgentProperties);
 router.post('/', [auth, upload.single('image')], propertyController.createProperty);
 router.get('/:id', propertyController.getProperty);
+router.delete('/:id', auth, propertyController.deleteProperty);
 
 module.exports = router;
