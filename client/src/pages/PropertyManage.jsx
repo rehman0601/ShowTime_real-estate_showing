@@ -165,6 +165,13 @@ const PropertyManage = () => {
                     {/* Time Slots Grid */}
                     <div className="slot-grid">
                         {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(time => {
+                            // Calculate exact time for this slot
+                            const [hours, minutes] = time.split(':');
+                            const slotDateTime = new Date(selectedDate);
+                            slotDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+                            const isPast = slotDateTime < new Date();
+
                             const slotExists = slots.find(s =>
                                 format(new Date(s.startTime), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd') &&
                                 format(new Date(s.startTime), 'HH:mm') === time
@@ -173,11 +180,12 @@ const PropertyManage = () => {
                             return (
                                 <button
                                     key={time}
-                                    disabled={!!slotExists}
+                                    disabled={!!slotExists || isPast}
                                     onClick={() => addSlot(time)}
-                                    className={`slot-btn ${slotExists ? 'disabled' : ''}`}
+                                    className={`slot-btn ${slotExists || isPast ? 'disabled' : ''}`}
+                                    style={isPast ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                                 >
-                                    {time} {slotExists && `(${slotExists.status})`}
+                                    {time} {slotExists ? `(${slotExists.status})` : (isPast ? '(Past)' : '')}
                                 </button>
                             );
                         })}

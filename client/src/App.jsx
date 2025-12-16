@@ -1,5 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
@@ -9,6 +12,7 @@ import BuyerDashboard from './pages/BuyerDashboard';
 import PropertyManage from './pages/PropertyManage';
 import PropertyView from './pages/PropertyView';
 import PrivateRoute from './components/PrivateRoute';
+import NotificationListener from './components/NotificationListener';
 import './styles/global.css';
 
 function App() {
@@ -17,6 +21,8 @@ function App() {
       <Router>
         <div className="app-min-h-screen">
           <Navbar />
+          <NotificationListener /> {/* Listen for events */}
+          <ToastContainer />       {/* Show toasts */}
           <div className="container">
             <Routes>
               <Route path="/login" element={<Login />} />

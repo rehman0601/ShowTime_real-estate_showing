@@ -63,7 +63,8 @@ const PropertyView = () => {
 
     const availableSlots = slots.filter(s =>
         s.status === 'available' &&
-        format(new Date(s.startTime), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
+        format(new Date(s.startTime), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd') &&
+        new Date(s.startTime) > new Date()
     );
 
     return (
@@ -82,7 +83,11 @@ const PropertyView = () => {
                     {Array.from({ length: 14 }).map((_, i) => {
                         const date = addDays(new Date(), i);
                         const isSelected = format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
-                        const daysSlots = slots.filter(s => s.status === 'available' && format(new Date(s.startTime), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd'));
+                        const daysSlots = slots.filter(s =>
+                            s.status === 'available' &&
+                            format(new Date(s.startTime), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd') &&
+                            new Date(s.startTime) > new Date()
+                        );
 
                         return (
                             <div

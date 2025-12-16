@@ -70,7 +70,12 @@ exports.bookSlot = async (req, res) => {
 
     // Real-time update
     const io = req.app.get('io');
-    io.emit('slotBooked', { slotId: slot._id, status: 'pending', propertyId: slot.propertyId });
+    io.emit('slotBooked', { 
+        slotId: slot._id, 
+        status: 'pending', 
+        propertyId: slot.propertyId,
+        agentId: slot.agentId // Add agentId so client can filter
+    });
 
     res.json(slot);
   } catch (err) {
